@@ -71,7 +71,7 @@ CREATE TABLE compromisos (
     FOREIGN KEY (id_actividad) REFERENCES actividades(id_actividad) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
---Contactos y Recordatorios
+-- Contactos y Recordatorios
 CREATE TABLE contactos (
     id_contacto INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
