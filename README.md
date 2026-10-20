@@ -75,35 +75,40 @@ Si creaste la base o el usuario anteriormente, no vuelvas a ejecutar a ciegas
 las sentencias `CREATE`: verifica que existan y actualiza la contraseña o los
 permisos según corresponda. No hace falta ejecutar `FLUSH PRIVILEGES`.
 
-## 4. Configurar la conexión de la aplicación
+## 4. Configurar la conexión de la aplicación con `.env`
 
-Desde la carpeta raíz del proyecto, crea el archivo local de configuración a
-partir de la plantilla:
+La aplicación lee primero las variables de entorno del sistema y luego las del
+archivo `.env`. En la raíz del proyecto, crea el archivo local a partir de la
+plantilla versionada:
 
 ```powershell
-Copy-Item database.example.conf database.conf
+Copy-Item .env.example .env
 ```
 
-Si `database.conf` ya existe, no ejecutes el comando para sobrescribirlo; edita
-ese archivo. Ábrelo con el editor y deja la sección `[mysql]` con valores
-equivalentes a estos:
+Si `.env` ya existe, no lo sobrescribas; edítalo. Configura valores como los
+siguientes y reemplaza el marcador de contraseña por la clave real del usuario
+MySQL:
 
-```ini
-[mysql]
-host = localhost
-port = 3306
-database = agenda
-user = agenda_app
-password = EligeUnaClaveSegura_123!
-charset = utf8mb4
-connect_timeout = 5
+```dotenv
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=agenda
+DB_USER=agenda_app
+DB_PASSWORD=EligeUnaClaveSegura_123!
+DB_CHARSET=utf8mb4
+DB_CONNECT_TIMEOUT=5
 ```
 
-La contraseña debe coincidir con la que estableciste para el usuario MySQL.
-`database.conf` contiene credenciales y está excluido del control de versiones;
-no lo subas ni compartas. Si cambias el puerto de MySQL, actualiza `port` aquí
-también. La aplicación busca este archivo en la carpeta del proyecto donde está
-`config.py`.
+La contraseña debe coincidir con la del paso 3. `.env` contiene credenciales y
+está excluido del control de versiones; no lo subas ni compartas. El repositorio
+incluye `.env.example` como plantilla sin credenciales reales. Al clonar el
+proyecto en otro equipo, crea allí su propio `.env`. Si cambias el puerto de
+MySQL, actualiza `DB_PORT`.
+
+Por compatibilidad, si alguna variable no está definida o está vacía, la
+aplicación puede usar el valor correspondiente de `database.conf`, si ese
+archivo local existe. Se recomienda configurar `.env`; no se debe subir ninguno
+de los dos archivos con contraseñas.
 
 ## 5. Crear el entorno de Python e instalar dependencias
 
@@ -157,10 +162,11 @@ modifican la base de datos de la aplicación.
 
 ## Solución de problemas
 
-- **No existe `database.conf`:** ejecuta `Copy-Item database.example.conf
-  database.conf` desde la raíz y completa la contraseña.
+- **No existe `.env` o faltan datos de conexión:** ejecuta
+  `Copy-Item .env.example .env` desde la raíz y completa `DB_PASSWORD` (y
+  verifica el resto de las variables).
 - **Access denied / acceso denegado:** verifica `user`, `password` y `host` en
-  `database.conf`, y que el usuario tenga permisos sobre `agenda.*`.
+  `.env`, y que el usuario tenga permisos sobre `agenda.*`.
 - **Unknown database / base de datos desconocida:** crea la base `agenda` con
   las sentencias del paso 3.
 - **Can't connect / conexión rechazada:** confirma que MySQL Server esté
