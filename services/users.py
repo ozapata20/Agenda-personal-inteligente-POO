@@ -1,9 +1,7 @@
-import hashlib
-import secrets
-
 from peewee import IntegrityError
 
 from models import Agendas, Usuarios
+from security import hash_password, is_legacy_hash, verify_password
 from services.common import atomic_for, delete_record, get_record
 from validators import required_text, validate_email
 
@@ -13,9 +11,7 @@ def _hash_password(password: str) -> str:
         raise ValueError("La contraseña es obligatoria.")
     if len(password) < 8:
         raise ValueError("La contraseña debe tener al menos 8 caracteres.")
-    salt = secrets.token_bytes(16)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, 260_000)
-    return f"pbkdf2_sha256$260000${salt.hex()}${digest.hex()}"
+    return hash_password(password)
 
 
 class UsuarioService:
@@ -33,6 +29,24 @@ class UsuarioService:
                 return usuario, agenda
         except IntegrityError as exc:
             raise ValueError(f"El correo '{email}' ya se encuentra registrado.") from exc
+
+    @staticmethod
+    def autenticar(email: str, password: str):
+        """Devuelve el usuario si las credenciales son correctas; si no, ValueError."""
+        error = ValueError("Correo o contraseña incorrectos.")
+        try:
+            email = validate_email(email)
+        except ValueError:
+            raise error from None
+        usuario = Usuarios.get_or_none(Usuarios.email == email)
+        stored_hash = usuario.password_hash if usuario else None
+        if not verify_password(password, stored_hash):
+            raise error
+        # Migra hashes antiguos (PBKDF2) a bcrypt de forma transparente
+        if is_legacy_hash(usuario.password_hash):
+            usuario.password_hash = hash_password(password)
+            usuario.save()
+        return usuario
 
     @staticmethod
     def listar():
@@ -62,7 +76,9 @@ class UsuarioService:
         try:
             usuario.save()
         except IntegrityError as exc:
-            raise ValueError(f"El correo '{usuario.email}' ya se encuentra registrado.") from exc
+            raise ValueError(
+                f"El correo '{usuario.email}' ya se encuentra registrado."
+            ) from exc
         return usuario
 
     @staticmethod
