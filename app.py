@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from functools import partial
 from getpass import getpass as hidden_getpass
 
@@ -245,30 +246,40 @@ def get_own_activity(agenda_id: int, activity_id: int) -> dict:
     return detail
 
 
-def _create_task_fields() -> dict:
-    return {
-        "fecha_vencimiento": input(
-            "Fecha de vencimiento (AAAA-MM-DD, opcional): "
-        ).strip() or None
-    }
+# Polimorfismo: cada tipo de actividad captura sus campos mediante la misma interfaz.
+class ActivityFieldPrompt(ABC):
+    @abstractmethod
+    def collect(self) -> dict[str, str | None]:
+        raise NotImplementedError
 
 
-def _create_event_fields() -> dict:
-    return {
-        "hora_inicio": input("Hora inicio (HH:MM): "),
-        "hora_fin": input("Hora término (HH:MM): "),
-        "ubicacion": input("Ubicación (opcional): "),
-    }
+class TaskFieldPrompt(ActivityFieldPrompt):
+    def collect(self) -> dict[str, str | None]:
+        return {
+            "fecha_vencimiento": input(
+                "Fecha de vencimiento (AAAA-MM-DD, opcional): "
+            ).strip() or None
+        }
 
 
-def _create_commitment_fields() -> dict:
-    return {"enlace_reunion": input("Enlace de reunión (opcional): ")}
+class EventFieldPrompt(ActivityFieldPrompt):
+    def collect(self) -> dict[str, str | None]:
+        return {
+            "hora_inicio": input("Hora inicio (HH:MM): "),
+            "hora_fin": input("Hora término (HH:MM): "),
+            "ubicacion": input("Ubicación (opcional): "),
+        }
 
 
-CREATE_FIELDS = {
-    "Tarea": _create_task_fields,
-    "Evento": _create_event_fields,
-    "Compromiso": _create_commitment_fields,
+class CommitmentFieldPrompt(ActivityFieldPrompt):
+    def collect(self) -> dict[str, str | None]:
+        return {"enlace_reunion": input("Enlace de reunión (opcional): ")}
+
+
+CREATE_FIELDS: dict[str, ActivityFieldPrompt] = {
+    "Tarea": TaskFieldPrompt(),
+    "Evento": EventFieldPrompt(),
+    "Compromiso": CommitmentFieldPrompt(),
 }
 
 
@@ -289,7 +300,7 @@ def create_activity(agenda_id: int):
         "categoria_id": category_id,
         "recurrencia_id": recurrence_id,
     }
-    data.update(CREATE_FIELDS[activity_type]())
+    data.update(CREATE_FIELDS[activity_type].collect())
     activity = ActividadService.crear(**data)
     print(f"Actividad creada con ID {activity.id_actividad}.")
 
