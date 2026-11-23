@@ -147,9 +147,12 @@ separado y puede no corresponder al esquema que administra actualmente la
 aplicación.
 
 Cuando aparezca el menú, selecciona **Usuarios y agendas** para registrar el
-primer usuario. Al crearlo, también se crea su agenda. Luego podrás gestionar
-actividades y los demás datos desde las opciones del menú. Las fechas se
-ingresan como `AAAA-MM-DD` y las horas como `HH:MM`.
+primer usuario. El registro solicita un RUT chileno válido, correo y contraseña
+con al menos 8 caracteres, una mayúscula, una minúscula, un número y uno de los
+caracteres `@ $ # ! * &`; al escribirla, la consola muestra asteriscos. Al
+crearlo, también se crea su agenda. Luego podrás
+gestionar actividades y los demás datos desde las opciones del menú. Las fechas
+se ingresan como `AAAA-MM-DD` y las horas como `HH:MM`.
 
 ## 7. Ejecutar las pruebas
 
@@ -179,6 +182,8 @@ modifican la base de datos de la aplicación.
 
 ## Notas sobre datos existentes
 
-La aplicación crea tablas faltantes, pero no realiza migraciones del esquema.
-Si conectas una base de datos que ya contiene tablas, haz una copia de seguridad
-y verifica que su estructura sea compatible antes de usarla.
+La aplicación crea tablas faltantes y, en bases existentes, agrega
+`usuarios.rut` como una columna nullable y única si no existe. Las cuentas
+anteriores quedan sin RUT hasta que se les asigne uno real; no inventes RUT.
+Haz una copia de seguridad antes de conectar una base existente y verifica que
+su estructura sea compatible.

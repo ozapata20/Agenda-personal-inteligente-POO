@@ -40,7 +40,7 @@ def validar_correo(correo):
         mensaje = 'Correo Válido.'
         return correo, mensaje
     else:
-        mensaje = 'Correo NO válido, ingrese nuevamente...'
+        mensaje = 'Correo NO válido.'
         correo = ''
         return correo, mensaje
     
@@ -48,7 +48,7 @@ def validar_fecha_nacimiento(fecha_nacimiento):
     patron_fecha = r'^\b(0[1-9]|[12]\d|3[01])/(0[1-9]|1[0-2])/(19\d\d|20\d\d)\b$'
 
     if not re.match(patron_fecha, fecha_nacimiento):
-        mensaje = 'Formato de fecha NO corresponde, ingrese nuevamente...'
+        mensaje = 'Formato de fecha NO corresponde, inténtalo de nuevo.'
         fecha_nacimiento = ''
         return fecha_nacimiento, mensaje
     else:
@@ -57,7 +57,7 @@ def validar_fecha_nacimiento(fecha_nacimiento):
             fecha_nacimiento = datetime.strptime(fecha_nacimiento, "%d/%m/%Y")
             return fecha_nacimiento, mensaje
         except ValueError:
-            mensaje = 'Fecha INVÁLIDA, ingrese nuevamente...'
+            mensaje = 'Fecha INVÁLIDA, inténtalo de nuevo.'
             fecha_nacimiento = ''
             return fecha_nacimiento, mensaje
 

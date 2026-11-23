@@ -6,6 +6,15 @@ from config import load_database_config
 database = MySQLDatabase(None)
 
 
+def ensure_user_rut_column(db):
+    columns = {column.name for column in db.get_columns("usuarios")}
+    if "rut" not in columns:
+        db.execute_sql(
+            "ALTER TABLE `usuarios` "
+            "ADD COLUMN `rut` VARCHAR(12) NULL UNIQUE"
+        )
+
+
 class DatabaseManager:
     @staticmethod
     def connect():
@@ -32,6 +41,7 @@ class DatabaseManager:
     def create_tables(models):
         try:
             database.create_tables(models, safe=True)
+            ensure_user_rut_column(database)
         except PeeweeException as exc:
             raise RuntimeError(f"No se pudieron preparar las tablas de agenda: {exc}") from exc
 

@@ -1,5 +1,5 @@
 from functools import partial
-from getpass import getpass
+from getpass import getpass as hidden_getpass
 
 from peewee import PeeweeException
 
@@ -30,7 +30,9 @@ PROMPT_EMAIL_OPT = "Correo (opcional): "
 PROMPT_PHONE_OPT = "Teléfono (opcional): "
 PROMPT_DATETIME = "Fecha y hora AAAA-MM-DD HH:MM: "
 PROMPT_MESSAGE = "Mensaje: "
-PROMPT_PASSWORD_NEW = "Contraseña (mínimo 8 caracteres): "
+PROMPT_PASSWORD_NEW = (
+    "Contraseña (8+ caracteres, mayúscula, minúscula, número y @ $ # ! * &): "
+)
 
 MENU_CRUD = "1. Listar  2. Crear  3. Actualizar  4. Eliminar  0. Volver"
 
@@ -38,6 +40,35 @@ CURRENT_USER = None  # se asigna tras el login
 
 
 # ---------------------------------------------------------------- Utilidades
+def read_password(prompt: str) -> str:
+    try:
+        import msvcrt
+    except ImportError:
+        return hidden_getpass(prompt)
+
+    print(prompt, end="", flush=True)
+    password: list[str] = []
+    while True:
+        char = msvcrt.getwch()
+        if char in ("\r", "\n"):
+            print()
+            return "".join(password)
+        if char == "\x03":
+            raise KeyboardInterrupt
+        if char == "\x1a":
+            raise EOFError
+        if char == "\b":
+            if password:
+                password.pop()
+                print("\b \b", end="", flush=True)
+            continue
+        if char in ("\x00", "\xe0"):
+            msvcrt.getwch()
+            continue
+        password.append(char)
+        print("*", end="", flush=True)
+
+
 def ask_int(prompt: str, optional: bool = False) -> int | None:
     while True:
         value = input(prompt).strip()
@@ -88,7 +119,7 @@ def login():
     """Pide credenciales. Devuelve el usuario autenticado o None."""
     for attempt in range(1, MAX_LOGIN_ATTEMPTS + 1):
         email = input("Correo: ").strip()
-        password = getpass("Contraseña: ")
+        password = read_password("Contraseña: ")
         try:
             user = UsuarioService.autenticar(email, password)
             print(f"Bienvenido, {user.nombre}.")
@@ -102,8 +133,9 @@ def login():
 def register():
     user, _agenda = UsuarioService.crear(
         input(PROMPT_NAME),
+        input("RUT (ejemplo: 12.345.678-5): "),
         input("Correo: "),
-        getpass(PROMPT_PASSWORD_NEW),
+        read_password(PROMPT_PASSWORD_NEW),
     )
     print(f"Usuario creado (ID {user.id_usuario}). Ya puedes iniciar sesión.")
 
@@ -405,7 +437,7 @@ def update_profile():
     user = UsuarioService.obtener(CURRENT_USER.id_usuario)
     nombre = ask_default("Nombre", user.nombre)
     email = ask_default("Correo", user.email)
-    password = getpass("Nueva contraseña (vacío para conservarla): ") or None
+    password = read_password("Nueva contraseña (vacío para conservarla): ") or None
     CURRENT_USER = UsuarioService.actualizar(user.id_usuario, nombre, email, password)
     print("Usuario actualizado.")
 
@@ -417,7 +449,9 @@ def delete_account() -> bool:
     if confirm.strip().lower() != "s":
         return False
     # Reautenticación antes de una acción destructiva
-    UsuarioService.autenticar(CURRENT_USER.email, getpass("Confirma tu contraseña: "))
+    UsuarioService.autenticar(
+        CURRENT_USER.email, read_password("Confirma tu contraseña: ")
+    )
     UsuarioService.eliminar(CURRENT_USER.id_usuario)
     print("Cuenta eliminada.")
     CURRENT_USER = None

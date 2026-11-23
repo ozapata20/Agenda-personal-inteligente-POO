@@ -26,6 +26,7 @@ class BaseModel(Model):
 class Usuarios(BaseModel):
     id_usuario = AutoField()
     nombre = CharField(max_length=100)
+    rut = CharField(max_length=12, unique=True)
     email = CharField(max_length=150, unique=True)
     password_hash = CharField()
     fecha_registro = DateTimeField(default=datetime.now, null=True)

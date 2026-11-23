@@ -24,8 +24,9 @@ class AgendaServicesTest(unittest.TestCase):
 
     def setUp(self):
         self.user, self.agenda = UsuarioService.crear(
-            "Ana", f"ana{self.id()}@example.cl", "clave-larga-123"
+            "Ana", "12.345.678-5", f"ana{self.id()}@example.cl", "Clave-larga-123!"
         )
+        self.assertEqual(self.user.rut, "12.345.678-5")
 
     def tearDown(self):
         UsuarioService.eliminar(self.user.id_usuario)
@@ -106,7 +107,31 @@ class AgendaServicesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             ActividadService.actualizar_avance_tarea(1, 150)
         with self.assertRaises(ValueError):
-            UsuarioService.crear("Duplicado", self.user.email, "clave-larga-123")
+            UsuarioService.crear(
+                "Correo duplicado",
+                "11.111.111-0",
+                self.user.email,
+                "Clave-larga-123!",
+            )
+        with self.assertRaisesRegex(ValueError, "RUT .* ya se encuentra registrado"):
+            UsuarioService.crear(
+                "RUT duplicado",
+                "12.345.678-5",
+                f"rut{self.id()}@example.cl",
+                "Clave-larga-123!",
+            )
+        with self.assertRaisesRegex(ValueError, "RUT no es válido"):
+            UsuarioService.crear(
+                "RUT inválido", "12.345.678-6", f"rut{self.id()}@example.cl",
+                "Clave-larga-123!",
+            )
+        with self.assertRaisesRegex(ValueError, "contraseña debe tener"):
+            UsuarioService.crear(
+                "Contraseña débil",
+                "11.111.111-1",
+                f"debil{self.id()}@example.cl",
+                "clave-sin-mayúscula",
+            )
 
     def test_catalog_and_user_updates(self):
         updated_user = UsuarioService.actualizar(
