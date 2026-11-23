@@ -1,4 +1,5 @@
 # Agenda personal inteligente
+# Por: Oscar Zapata y Javier Morgado.
 
 Aplicación de consola para administrar usuarios y sus agendas, actividades
 (tareas, eventos y compromisos), categorías, contactos, recurrencias y
