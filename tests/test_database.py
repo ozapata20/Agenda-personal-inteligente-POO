@@ -2,7 +2,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock
 
-from database import ensure_user_rut_column
+from datos.conexion.database import ensure_user_rut_column
 
 
 class EnsureUserRutColumnTest(unittest.TestCase):

@@ -1,1 +1,1 @@
-"""Servicios de negocio para la aplicación de agenda."""
+"""Compatibilidad con el paquete services anterior."""

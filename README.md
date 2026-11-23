@@ -9,6 +9,24 @@ MySQL para guardar la información.
 Esta guía describe cómo obtener una copia con GitHub Desktop, instalar los
 requisitos en Windows, preparar MySQL y ejecutar el programa desde cero.
 
+## Estructura del proyecto
+
+```text
+datos/
+  conexion/
+  modelos/
+  repositorio/
+  sql/
+negocio/
+presentacion/
+auxiliares/
+README.md
+main.py
+```
+
+Los antiguos nombres de módulos se conservan mediante compatibilidad en la raíz
+del proyecto, por lo que las referencias existentes siguen funcionando.
+
 ## Requisitos
 
 - Windows 10 u 11.
@@ -34,7 +52,7 @@ requisitos en Windows, preparar MySQL y ejecutar el programa desde cero.
    clonada en tu editor).
 
 Los siguientes comandos deben ejecutarse en una terminal de PowerShell abierta
-en la carpeta del proyecto, donde están `app.py` y `requirements.txt`.
+en la carpeta del proyecto, donde están `main.py` y `requirements.txt`.
 
 ## 2. Instalar e iniciar MySQL Server
 
@@ -59,7 +77,7 @@ globales.
 
 Conéctate al servidor con `root` (por ejemplo, desde MySQL Workbench) y ejecuta
 estas sentencias. Sustituye `EligeUnaClaveSegura_123!` por una contraseña propia
-y segura; usarás la misma en `database.conf` en el siguiente paso.
+y segura; usarás la misma en `auxiliares/database.conf` en el siguiente paso.
 
 ```sql
 CREATE DATABASE agenda
@@ -107,7 +125,7 @@ proyecto en otro equipo, crea allí su propio `.env`. Si cambias el puerto de
 MySQL, actualiza `DB_PORT`.
 
 Por compatibilidad, si alguna variable no está definida o está vacía, la
-aplicación puede usar el valor correspondiente de `database.conf`, si ese
+aplicación puede usar el valor correspondiente de `auxiliares/database.conf`, si ese
 archivo local existe. Se recomienda configurar `.env`; no se debe subir ninguno
 de los dos archivos con contraseñas.
 
@@ -137,7 +155,7 @@ Python 3.10 o superior y vuelve a abrir PowerShell.
 Desde la raíz del proyecto:
 
 ```powershell
-.\.venv\Scripts\python.exe app.py
+.\.venv\Scripts\python.exe main.py
 ```
 
 Al iniciar, la aplicación se conecta a MySQL y crea automáticamente las tablas
@@ -174,7 +192,7 @@ modifican la base de datos de la aplicación.
 - **Unknown database / base de datos desconocida:** crea la base `agenda` con
   las sentencias del paso 3.
 - **Can't connect / conexión rechazada:** confirma que MySQL Server esté
-  iniciado y que el puerto de `database.conf` coincida con el configurado en
+  iniciado y que el puerto de `auxiliares/database.conf` coincida con el configurado en
   MySQL.
 - **No se encuentra `py` o Python:** instala Python 3.10 o superior, habilita
   **Add Python to PATH** y abre una terminal nueva.

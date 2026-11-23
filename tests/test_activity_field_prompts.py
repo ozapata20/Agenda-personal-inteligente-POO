@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from app import CREATE_FIELDS
+from presentacion.app import CREATE_FIELDS
 
 
 class ActivityFieldPromptsTest(unittest.TestCase):

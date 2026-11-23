@@ -2,11 +2,11 @@ import unittest
 
 from peewee import SqliteDatabase
 
-from models import MODELS
-from services.activities import ActividadService
-from services.catalog import CategoriaService, ContactoService, RecurrenciaService
-from services.reminders import RecordatorioService
-from services.users import UsuarioService
+from datos.modelos.models import MODELS
+from negocio.activities import ActividadService
+from negocio.catalog import CategoriaService, ContactoService, RecurrenciaService
+from negocio.reminders import RecordatorioService
+from negocio.users import UsuarioService
 
 
 class AgendaServicesTest(unittest.TestCase):

@@ -4,7 +4,7 @@ from io import StringIO
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from app import read_password
+from presentacion.app import read_password
 
 
 class ReadPasswordTest(unittest.TestCase):
